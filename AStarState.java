@@ -64,7 +64,7 @@ public class AStarState
      **/
     public boolean addOpenWaypoint(Waypoint newWP)
     {
-        if(this.openedHashMap.containsKey(newWP.getLocation()))
+        if(this.openedHashMap.containsKey(newWP.getLocation().hashCode()))
         {
             if(newWP.getPreviousCost() < this.openedHashMap.get(newWP.getLocation().hashCode()).getPreviousCost())
             {

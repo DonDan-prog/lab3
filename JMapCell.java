@@ -1,7 +1,5 @@
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
-
 
 /**
  * This class is a custom Swing component for representing a single map cell in
