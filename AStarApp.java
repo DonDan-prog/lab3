@@ -212,8 +212,8 @@ public class AStarApp {
         frame.pack();
         frame.setVisible(true);
 
-        // mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(true);
-        // mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(true);
+        mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(true);
+        mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(true);
     }
 
     
