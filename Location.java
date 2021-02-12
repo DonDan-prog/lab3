@@ -24,6 +24,9 @@ public class Location
         this(0, 0);
     }
 
+    public void setX(int x) { this.xCoord = x;}
+    public void setY(int y) { this.yCoord = y;}
+
     public boolean equals(Location loc)
     {
         return this.xCoord == loc.xCoord && this.yCoord == loc.yCoord;

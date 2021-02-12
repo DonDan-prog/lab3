@@ -1,7 +1,9 @@
-import java.awt.*;
+﻿import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Random;
 
+import javax.swing.*;
 
 /**
  * A simple Swing application to demonstrate the A* pathfinding algorithm.  The
@@ -19,10 +21,13 @@ public class AStarApp {
     private int height;
     
     /** The location where the path starts from. **/
-    private Location startLoc;
+    private Location startLoc = null;
     
     /** The location where the path is supposed to finish. **/
-    private Location finishLoc;
+    private Location finishLoc = null;
+
+    /** The flag to making the start and end points */
+    private boolean markingStart = true;
     
     /**
      * This is a 2D array of UI components that provide display and manipulation
@@ -54,16 +59,41 @@ public class AStarApp {
         /** Initiates the modification operation. **/
         public void mousePressed(MouseEvent e)
         {
-            modifying = true;
+            final int button = e.getButton();
+            if(button == e.BUTTON1 || button == e.BUTTON3)
+            {
+                modifying = true;
             
-            JMapCell cell = (JMapCell) e.getSource();
-            
-            // If the current cell is passable then we are making them
-            // impassable; if it's impassable then we are making them passable.
-            
-            makePassable = !cell.isPassable();
-            
-            cell.setPassable(makePassable);
+                JMapCell cell = (JMapCell) e.getSource();
+                    
+                // If the current cell is passable then we are making them
+                // impassable; if it's impassable then we are making them passable.
+                    
+                makePassable = !cell.isPassable();
+                    
+                cell.setPassable(makePassable);
+            }
+            else if(button == e.BUTTON2)
+            {
+                JMapCell cell = (JMapCell) e.getSource();
+                if(!cell.passable) 
+                    cell.setPassable(true);
+                if(markingStart)
+                {
+                    mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(false);
+                    startLoc.setX(cell.x);
+                    startLoc.setY(cell.y);
+                    mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(true);
+                }
+                else
+                {
+                    mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(false);
+                    finishLoc.setX(cell.x);
+                    finishLoc.setY(cell.y);
+                    mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(true);
+                }
+                markingStart = !markingStart;
+            }
         }
 
         /** Ends the modification operation. **/
@@ -151,7 +181,7 @@ public class AStarApp {
         {
             for (int x = 0; x < width; x++)
             {
-                mapCells[x][y] = new JMapCell();
+                mapCells[x][y] = new JMapCell(x, y);
 
                 gbConstraints.gridx = x;
                 gbConstraints.gridy = y;
@@ -169,14 +199,21 @@ public class AStarApp {
         findPathButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) { findAndShowPath(); }
         });
+
+        /** Кнопка для генерации лабиринта */
+        JButton generateMazeButton = new JButton("Generete maze");
+        generateMazeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { genereteMaze(); }
+        });
         
         contentPane.add(findPathButton, BorderLayout.SOUTH);
+        contentPane.add(generateMazeButton, BorderLayout.NORTH);
         
         frame.pack();
         frame.setVisible(true);
 
-        mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(true);
-        mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(true);
+        // mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(true);
+        // mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(true);
     }
 
     
@@ -231,7 +268,120 @@ public class AStarApp {
             wp = wp.getPrevious();
         }
     }
-    
+    /** Uses Prim's algorithm to create a maze */
+    private void genereteMaze()
+    {
+        mapCells[startLoc.xCoord][startLoc.yCoord].setEndpoint(false);
+        mapCells[finishLoc.xCoord][finishLoc.yCoord].setEndpoint(false);
+
+        startLoc.setX(2);
+        startLoc.setY(height / 2);
+
+        finishLoc.setX(width - 3);
+        finishLoc.setY(height / 2);
+
+        final Random random = new Random();
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                mapCells[x][y].setPassable(false);
+                mapCells[x][y].setPath(false);
+            }
+        }
+        
+        int x = startLoc.xCoord;
+        int y = startLoc.yCoord;
+
+        ArrayList<JMapCell> to_check = new ArrayList<>();
+        if(y - 2 >= 0)
+            to_check.add(mapCells[x][y-2]);
+        if(y + 2 < height)
+            to_check.add(mapCells[x][y+2]);
+        if(x - 2 >= 0)
+            to_check.add(mapCells[x-2][y]);
+        if(x + 2 > width)
+            to_check.add(mapCells[x + 2][y]);
+
+        while(to_check.size() > 0)
+        {
+            int index = random.nextInt(to_check.size());
+
+            JMapCell cell = to_check.get(index);
+            x = cell.x;
+            y = cell.y;
+
+            mapCells[x][y].setPassable(true);
+            to_check.remove(index);
+
+            final int NORTH = 1;
+            final int SOUTH = 2;
+            final int EAST = 3;
+            final int WEST = 4;
+
+            ArrayList<Integer> direction = new ArrayList<>();
+            direction.add(NORTH);
+            direction.add(SOUTH);
+            direction.add(EAST);
+            direction.add(WEST);
+            
+            while(direction.size() > 0)
+            {
+                int dir_index = random.nextInt(direction.size());
+                switch(direction.get(dir_index))
+                {
+                    case NORTH:
+                    {
+                        if(y - 2 >= 0 && !mapCells[x][y-2].isPassable())
+                        {
+                            mapCells[x][y-1].setPassable(true);
+                            direction.clear();
+                        }
+                        break;
+                    }
+                    case SOUTH:
+                    {
+                        if(y + 2 < height && !mapCells[x][y+2].isPassable())
+                        {
+                            mapCells[x][y+1].setPassable(true);
+                            direction.clear();
+                        }
+                        break;
+                    }
+                    case EAST:
+                    {
+                        if(x - 2 >= 0 && !mapCells[x - 2][y].isPassable())
+                        {
+                            mapCells[x - 1][y].setPassable(true);
+                            direction.clear();
+                        }
+                        break;
+                    }
+                    case WEST:
+                    {
+                        if(x + 2 < width && !mapCells[x + 2][y].isPassable())
+                        {
+                            mapCells[x + 1][y].setPassable(true);
+                            direction.clear();
+                        }
+                        break;
+                    }
+                }
+                if(!direction.isEmpty())
+                    direction.remove(dir_index);
+            }
+
+            if(y - 2 >= 0 && !mapCells[x][y - 2].isPassable())
+                to_check.add(mapCells[x][y - 2]);
+            if(y + 2 < height && !mapCells[x][y + 2].isPassable())
+                to_check.add(mapCells[x][y + 2]);
+            if(x - 2 >= 0 && !mapCells[x - 2][y].isPassable())
+                to_check.add(mapCells[x - 2][y]);
+            if(x + 2 < width && !mapCells[x + 2][y].isPassable())
+                to_check.add(mapCells[x + 2][y]);
+        }
+    }
     
     /**
      * Entry-point for the application.  No command-line arguments are

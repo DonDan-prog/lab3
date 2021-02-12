@@ -9,6 +9,9 @@ import javax.swing.*;
 public class JMapCell extends JComponent
 {
     private static final Dimension CELL_SIZE = new Dimension(12, 12);
+
+    int x;
+    int y;
     
     /** True indicates that the cell is an endpoint, either start or finish. **/
     boolean endpoint = false;
@@ -21,13 +24,14 @@ public class JMapCell extends JComponent
      * True indicates that this cell is part of the path between start and end.
      **/
     boolean path = false;
-    
     /**
      * Construct a new map cell with the specified "passability."  An input of
      * true means the cell is passable.
      **/
-    public JMapCell(boolean pass)
+    public JMapCell(int x, int y, boolean pass)
     {
+        this.x = x;
+        this.y = y;
         // Set the preferred cell size, to drive the initial window size.
         setPreferredSize(CELL_SIZE);
         
@@ -35,10 +39,10 @@ public class JMapCell extends JComponent
     }
     
     /** Construct a new map cell, which is passable by default. **/
-    public JMapCell()
+    public JMapCell(int x, int y)
     {
         // Call the other constructor, specifying true for "passable".
-        this(true);
+        this(x, y, true);
     }
     
     /** Marks this cell as either being the starting or the ending cell. **/
@@ -76,7 +80,6 @@ public class JMapCell extends JComponent
         this.path = path;
         updateAppearance();
     }
-    
     /**
      * This helper method updates the background color to match the current
      * internal state of the cell.
