@@ -12,8 +12,8 @@ public class AStarState
     /** This is a reference to the map that the A* algorithm is navigating. **/
     private Map2D map;
 
-    private HashMap<Integer, Waypoint> openedHashMap;
-    private HashMap<Integer, Waypoint> closedHashMap;
+    private HashMap<Location, Waypoint> openedHashMap;
+    private HashMap<Location, Waypoint> closedHashMap;
     /**
      * Initialize a new state object for the A* pathfinding algorithm to use.
      **/
@@ -64,17 +64,17 @@ public class AStarState
      **/
     public boolean addOpenWaypoint(Waypoint newWP)
     {
-        if(this.openedHashMap.containsKey(newWP.getLocation().hashCode()))
+        if(this.openedHashMap.containsKey(newWP.getLocation()))
         {
-            if(newWP.getPreviousCost() < this.openedHashMap.get(newWP.getLocation().hashCode()).getPreviousCost())
+            if(newWP.getPreviousCost() < this.openedHashMap.get(newWP.getLocation()).getPreviousCost())
             {
-                openedHashMap.put(newWP.getLocation().hashCode(), newWP);
+                openedHashMap.put(newWP.getLocation(), newWP);
                 return true;
             }
         }
         else
         {
-            openedHashMap.put(newWP.getLocation().hashCode(), newWP);
+            openedHashMap.put(newWP.getLocation(), newWP);
             return true;
         }  
         return false;
@@ -94,10 +94,10 @@ public class AStarState
      **/
     public void closeWaypoint(Location loc)
     {
-        Waypoint temp = this.openedHashMap.get(loc.hashCode());
-        this.openedHashMap.remove(loc.hashCode());
+        Waypoint temp = this.openedHashMap.get(loc);
+        this.openedHashMap.remove(loc);
 
-        this.closedHashMap.put(loc.hashCode(), temp);
+        this.closedHashMap.put(loc, temp);
     }
 
     /**
@@ -106,10 +106,9 @@ public class AStarState
      **/
     public boolean isLocationClosed(Location loc)
     {
-        int find = loc.hashCode();
-        for(int i : closedHashMap.keySet())
+        for(Location i : closedHashMap.keySet())
         {
-            if(i == find)
+            if(loc.equals(i))
                 return true;
         }
         return false;

@@ -260,9 +260,10 @@ public class AStarApp {
         finishLoc.setY(height / 2);
 
         final Random random = new Random();
-
+        
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                mapCells[x][y].setPassable(true);
                 mapCells[x][y].setPassable(false);
                 mapCells[x][y].setPath(false);
             }
